@@ -1,0 +1,28 @@
+# Ambientes virtuais e pacotes Python
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Arquivos de variáveis de ambiente (CRÍTICO)
+.env
+.env.local
+.env.production
+.env.development.local
+
+# Banco de dados local SQLite
+dev.db
+*.db
+
+# Pastas de build do Frontend
+.next/
+node_modules/
+out/
+build/
+.turbo/
+
+# Logs e arquivos temporários
+*.log
+.pytest_cache/
+.eslintcache
