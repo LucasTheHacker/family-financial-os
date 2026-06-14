@@ -38,8 +38,12 @@ class Settings:
     )
     
     BACKEND_CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "https://family-financial-os.vercel.app",  # placeholder production URL
+        origin.strip()
+        for origin in os.getenv(
+            "BACKEND_CORS_ORIGINS",
+            "http://localhost:3000,https://family-financial-os.vercel.app"
+        ).split(",")
+        if origin.strip()
     ]
 
 settings = Settings()
