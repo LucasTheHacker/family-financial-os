@@ -5,7 +5,7 @@
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE participations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE financing ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE financing ENABLE ROW LEVEL SECURITY;
 
 -- Also enable RLS on the recurring templates tables to secure them
 ALTER TABLE recurring_expenses ENABLE ROW LEVEL SECURITY;
@@ -39,12 +39,12 @@ USING (true)
 WITH CHECK (true);
 
 -- Financing Table Policies
-CREATE POLICY "Allow authenticated users full access to financing"
-ON financing
-FOR ALL
-TO authenticated
-USING (true)
-WITH CHECK (true);
+-- CREATE POLICY "Allow authenticated users full access to financing"
+-- ON financing
+-- FOR ALL
+-- TO authenticated
+-- USING (true)
+-- WITH CHECK (true);
 
 -- Recurring Expenses Table Policies
 CREATE POLICY "Allow authenticated users full access to recurring_expenses"
