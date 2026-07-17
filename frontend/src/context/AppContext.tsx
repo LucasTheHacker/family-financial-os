@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { User, UserCreate, Expense, ExpenseCreate, SettlementReport, RecurringExpense, RecurringExpenseCreate } from "@/types";
+import { User, UserCreate, Expense, ExpenseCreate, SettlementReport } from "@/types";
 import { api } from "@/lib/api";
 import { usePathname } from "next/navigation";
 
@@ -9,7 +9,6 @@ interface AppContextType {
   users: User[];
   expenses: Expense[];
   settlements: SettlementReport | null;
-  recurringTemplates: RecurringExpense[];
   currentCycle: string;
   loading: boolean;
   error: string | null;
@@ -17,17 +16,13 @@ interface AppContextType {
   refreshUsers: () => Promise<void>;
   refreshExpenses: () => Promise<void>;
   refreshSettlements: () => Promise<void>;
-  refreshRecurringTemplates: () => Promise<void>;
   refreshAll: () => Promise<void>;
   createUser: (user: UserCreate) => Promise<User>;
   updateUser: (userId: string, user: Partial<UserCreate>) => Promise<User>;
   deleteUser: (userId: string) => Promise<void>;
   createExpense: (expense: ExpenseCreate) => Promise<Expense>;
   updateExpense: (expenseId: string, expense: Partial<ExpenseCreate>) => Promise<Expense>;
-  deleteExpense: (expenseId: string, deleteGroup?: boolean) => Promise<void>;
-  createRecurringTemplate: (template: RecurringExpenseCreate) => Promise<RecurringExpense>;
-  deleteRecurringTemplate: (templateId: string) => Promise<void>;
-  generateRecurringExpenses: (cycle: string) => Promise<Expense[]>;
+  deleteExpense: (expenseId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -46,7 +41,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [users, setUsers] = useState<User[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [settlements, setSettlements] = useState<SettlementReport | null>(null);
-  const [recurringTemplates, setRecurringTemplates] = useState<RecurringExpense[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,16 +78,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentCycle]);
 
-  const refreshRecurringTemplates = useCallback(async () => {
-    try {
-      const data = await api.getRecurringTemplates();
-      setRecurringTemplates(data);
-    } catch (err: any) {
-      console.error("Error fetching recurring templates:", err);
-      setError(err.message || "Failed to fetch recurring templates");
-    }
-  }, []);
-
   const refreshAll = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -101,15 +85,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await Promise.all([
         refreshUsers(),
         refreshExpenses(),
-        refreshSettlements(),
-        refreshRecurringTemplates()
+        refreshSettlements()
       ]);
     } catch (err: any) {
       setError("An error occurred while reloading data.");
     } finally {
       setLoading(false);
     }
-  }, [refreshUsers, refreshExpenses, refreshSettlements, refreshRecurringTemplates]);
+  }, [refreshUsers, refreshExpenses, refreshSettlements]);
 
   // Handle data updates when billing cycle changes
   useEffect(() => {
@@ -135,7 +118,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       setError(null);
       try {
-        await Promise.all([refreshUsers(), refreshRecurringTemplates()]);
+        await Promise.all([refreshUsers()]);
       } catch (err) {
         // error handled in sub-methods
       } finally {
@@ -143,7 +126,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     };
     initialLoad();
-  }, [refreshUsers, refreshRecurringTemplates, pathname]);
+  }, [refreshUsers, pathname]);
 
   const createUser = async (user: UserCreate) => {
     setLoading(true);
@@ -214,54 +197,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteExpense = async (expenseId: string, deleteGroup: boolean = false) => {
+  const deleteExpense = async (expenseId: string) => {
     setLoading(true);
     try {
-      await api.deleteExpense(expenseId, deleteGroup);
+      await api.deleteExpense(expenseId);
       await Promise.all([refreshExpenses(), refreshSettlements()]);
     } catch (err: any) {
       setError(err.message || "Failed to delete expense");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createRecurringTemplate = async (template: RecurringExpenseCreate) => {
-    setLoading(true);
-    try {
-      const newTemplate = await api.createRecurringTemplate(template);
-      await refreshRecurringTemplates();
-      return newTemplate;
-    } catch (err: any) {
-      setError(err.message || "Failed to create recurring template");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteRecurringTemplate = async (templateId: string) => {
-    setLoading(true);
-    try {
-      await api.deleteRecurringTemplate(templateId);
-      await refreshRecurringTemplates();
-    } catch (err: any) {
-      setError(err.message || "Failed to delete recurring template");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateRecurringExpenses = async (cycle: string) => {
-    setLoading(true);
-    try {
-      const generated = await api.generateRecurringExpenses(cycle);
-      await Promise.all([refreshExpenses(), refreshSettlements()]);
-      return generated;
-    } catch (err: any) {
-      setError(err.message || "Failed to generate recurring expenses");
       throw err;
     } finally {
       setLoading(false);
@@ -274,7 +216,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         users,
         expenses,
         settlements,
-        recurringTemplates,
         currentCycle,
         loading,
         error,
@@ -282,7 +223,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         refreshUsers,
         refreshExpenses,
         refreshSettlements,
-        refreshRecurringTemplates,
         refreshAll,
         createUser,
         updateUser,
@@ -290,9 +230,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createExpense,
         updateExpense,
         deleteExpense,
-        createRecurringTemplate,
-        deleteRecurringTemplate,
-        generateRecurringExpenses,
       }}
     >
       {children}

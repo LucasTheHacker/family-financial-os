@@ -16,7 +16,7 @@ class Expense(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     
     # Module 3 columns
-    recurring_expense_id = Column(UUID(as_uuid=True), ForeignKey("recurring_expenses.id", ondelete="SET NULL"), nullable=True)
+    recurring_expense_id = Column(UUID(as_uuid=True), nullable=True)
     installment_number = Column(Integer, nullable=True)
     total_installments = Column(Integer, nullable=True)
     parent_installment_id = Column(UUID(as_uuid=True), nullable=True)
@@ -32,4 +32,3 @@ class Expense(Base):
         lazy="selectin"
     )
     
-    recurring_expense = relationship("RecurringExpense", back_populates="generated_expenses")

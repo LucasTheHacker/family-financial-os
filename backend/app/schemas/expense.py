@@ -11,20 +11,18 @@ class ExpenseBase(BaseModel):
     total_amount: Decimal = Field(..., ge=0, decimal_places=2, examples=[120.00])
     date: Optional[datetime] = None
     payer_id: UUID
-    expense_type: str = Field(..., description="Must be Single, Fixed, or Installment")
+    expense_type: str = Field("Single", description="Must be Single")
     billing_cycle: str = Field(..., pattern="^[0-9]{4}-[0-9]{2}$", description="Billing cycle in format YYYY-MM")
 
     @field_validator("expense_type")
     @classmethod
     def validate_expense_type(cls, v: str) -> str:
-        valid_types = {"Single", "Fixed", "Installment"}
+        valid_types = {"Single"}
         if v not in valid_types:
             raise ValueError(f"expense_type must be one of {valid_types}")
         return v
 
 class ExpenseCreate(ExpenseBase):
-    total_installments: Optional[int] = Field(None, ge=1, description="Total number of installments (only for Installment expense_type)", examples=[3])
-    # In Pydantic V2, min_length is used for lists/arrays as well
     participations: List[ParticipationCreate] = Field(
         ..., 
         min_length=1, 
@@ -45,7 +43,7 @@ class ExpenseUpdate(BaseModel):
     def validate_expense_type(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
             return v
-        valid_types = {"Single", "Fixed", "Installment"}
+        valid_types = {"Single"}
         if v not in valid_types:
             raise ValueError(f"expense_type must be one of {valid_types}")
         return v

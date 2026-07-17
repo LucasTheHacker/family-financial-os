@@ -83,7 +83,6 @@ export default function Navbar() {
           {[
             { id: "dashboard", label: "Painel Geral" },
             { id: "ledger", label: "Lista de Rateios" },
-            { id: "recurring", label: "Rateios Fixos" },
             { id: "members", label: "Membros" },
           ].map((tab) => (
             <button
@@ -157,7 +156,6 @@ export default function Navbar() {
         {[
           { id: "dashboard", label: "Painel", icon: "📊" },
           { id: "ledger", label: "Rateios", icon: "💸" },
-          { id: "recurring", label: "Fixos", icon: "🔄" },
           { id: "members", label: "Membros", icon: "👥" },
         ].map((tab) => (
           <button

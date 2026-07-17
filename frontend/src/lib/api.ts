@@ -4,8 +4,6 @@ import {
   Expense,
   ExpenseCreate,
   SettlementReport,
-  RecurringExpense,
-  RecurringExpenseCreate,
 } from "../types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
@@ -92,28 +90,12 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(expense),
     }),
-  deleteExpense: (expenseId: string, deleteGroup: boolean = false) =>
-    request<void>(`/api/v1/expenses/${expenseId}?delete_group=${deleteGroup}`, {
+  deleteExpense: (expenseId: string) =>
+    request<void>(`/api/v1/expenses/${expenseId}`, {
       method: "DELETE",
     }),
 
   // Settlements
   getSettlements: (billingCycle: string) =>
     request<SettlementReport>(`/api/v1/expenses/settlement?billing_cycle=${billingCycle}`),
-
-  // Recurring Template
-  getRecurringTemplates: () => request<RecurringExpense[]>("/api/v1/recurring-expenses/"),
-  createRecurringTemplate: (template: RecurringExpenseCreate) =>
-    request<RecurringExpense>("/api/v1/recurring-expenses/", {
-      method: "POST",
-      body: JSON.stringify(template),
-    }),
-  deleteRecurringTemplate: (templateId: string) =>
-    request<void>(`/api/v1/recurring-expenses/${templateId}`, {
-      method: "DELETE",
-    }),
-  generateRecurringExpenses: (billingCycle: string) =>
-    request<Expense[]>(`/api/v1/recurring-expenses/generate?billing_cycle=${billingCycle}`, {
-      method: "POST",
-    }),
 };

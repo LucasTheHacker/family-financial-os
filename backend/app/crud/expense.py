@@ -77,19 +77,6 @@ def get_expenses(db: Session, skip: int = 0, limit: int = 100) -> List[Expense]:
 def get_expenses_by_billing_cycle(db: Session, billing_cycle: str) -> List[Expense]:
     return db.query(Expense).filter(Expense.billing_cycle == billing_cycle).all()
 
-def increment_billing_cycle(billing_cycle: str, months_to_add: int) -> str:
-    """
-    Increments a YYYY-MM billing cycle by a number of months.
-    """
-    year = int(billing_cycle[:4])
-    month = int(billing_cycle[5:7])
-    
-    total_months = month + months_to_add - 1
-    new_year = year + (total_months // 12)
-    new_month = (total_months % 12) + 1
-    
-    return f"{new_year:04d}-{new_month:02d}"
-
 def create_expense(db: Session, expense_in: ExpenseCreate) -> Expense:
     # 1. Validate payer exists
     payer = db.query(User).filter(User.id == expense_in.payer_id).first()
@@ -102,100 +89,32 @@ def create_expense(db: Session, expense_in: ExpenseCreate) -> Expense:
     if db_users_count != len(participant_ids):
         raise ValueError("One or more participant user IDs do not exist")
 
-    if expense_in.expense_type == "Installment":
-        total_inst = expense_in.total_installments
-        if not total_inst or total_inst < 1:
-            raise ValueError("total_installments must be at least 1 when expense_type is 'Installment'")
-            
-        parent_inst_id = uuid.uuid4()
-        
-        # Calculate monthly installment amounts (with cross-month rounding corrections)
-        total_amount = Decimal(str(expense_in.total_amount))
-        base_inst_amount = (total_amount / total_inst).quantize(Decimal("0.01"))
-        last_inst_amount = total_amount - (base_inst_amount * (total_inst - 1))
-        
-        generated_expenses = []
-        for i in range(1, total_inst + 1):
-            inst_amount = base_inst_amount if i < total_inst else last_inst_amount
-            inst_billing_cycle = increment_billing_cycle(expense_in.billing_cycle, i - 1)
-            inst_title = f"{expense_in.title} ({i}/{total_inst})"
-            
-            # Divide participation inputs
-            inst_parts = []
-            for p in expense_in.participations:
-                if p.value is not None:
-                    p_total_value = Decimal(str(p.value))
-                    p_base_value = (p_total_value / total_inst).quantize(Decimal("0.01"))
-                    p_last_value = p_total_value - (p_base_value * (total_inst - 1))
-                    p_val = p_base_value if i < total_inst else p_last_value
-                    inst_parts.append(ParticipationCreate(user_id=p.user_id, value=p_val))
-                else:
-                    inst_parts.append(ParticipationCreate(user_id=p.user_id, weight=p.weight))
-                    
-            # Distribute shares for this month's installment
-            distributed_shares = distribute_shares(inst_amount, inst_parts)
-            
-            # Create the expense row
-            db_expense = Expense(
-                title=inst_title,
-                total_amount=inst_amount,
-                date=expense_in.date,
-                payer_id=expense_in.payer_id,
-                expense_type=expense_in.expense_type,
-                billing_cycle=inst_billing_cycle,
-                installment_number=i,
-                total_installments=total_inst,
-                parent_installment_id=parent_inst_id
-            )
-            db.add(db_expense)
-            db.flush()  # Generate expense ID
-            
-            # Create participations
-            for share in distributed_shares:
-                db_part = Participation(
-                    expense_id=db_expense.id,
-                    user_id=share["user_id"],
-                    value=share["value"],
-                    weight=share["weight"]
-                )
-                db.add(db_part)
-                
-            generated_expenses.append(db_expense)
-            
-        db.commit()
-        # Refresh to load relationships
-        for e in generated_expenses:
-            db.refresh(e)
-            
-        return generated_expenses[0]
-        
-    else:
-        # Standard Single / Fixed expense creation
-        distributed_shares = distribute_shares(expense_in.total_amount, expense_in.participations)
+    # Standard Single expense creation
+    distributed_shares = distribute_shares(expense_in.total_amount, expense_in.participations)
 
-        db_expense = Expense(
-            title=expense_in.title,
-            total_amount=expense_in.total_amount,
-            date=expense_in.date,
-            payer_id=expense_in.payer_id,
-            expense_type=expense_in.expense_type,
-            billing_cycle=expense_in.billing_cycle
+    db_expense = Expense(
+        title=expense_in.title,
+        total_amount=expense_in.total_amount,
+        date=expense_in.date,
+        payer_id=expense_in.payer_id,
+        expense_type="Single",
+        billing_cycle=expense_in.billing_cycle
+    )
+    db.add(db_expense)
+    db.flush()
+
+    for share in distributed_shares:
+        db_part = Participation(
+            expense_id=db_expense.id,
+            user_id=share["user_id"],
+            value=share["value"],
+            weight=share["weight"]
         )
-        db.add(db_expense)
-        db.flush()
+        db.add(db_part)
 
-        for share in distributed_shares:
-            db_part = Participation(
-                expense_id=db_expense.id,
-                user_id=share["user_id"],
-                value=share["value"],
-                weight=share["weight"]
-            )
-            db.add(db_part)
-
-        db.commit()
-        db.refresh(db_expense)
-        return db_expense
+    db.commit()
+    db.refresh(db_expense)
+    return db_expense
 
 def update_expense(db: Session, db_expense: Expense, expense_in: ExpenseUpdate) -> Expense:
     update_data = expense_in.model_dump(exclude_unset=True)
@@ -282,10 +201,7 @@ def update_expense(db: Session, db_expense: Expense, expense_in: ExpenseUpdate) 
     db.refresh(db_expense)
     return db_expense
 
-def delete_expense(db: Session, db_expense: Expense, delete_group: bool = False) -> bool:
-    if delete_group and db_expense.parent_installment_id:
-        db.query(Expense).filter(Expense.parent_installment_id == db_expense.parent_installment_id).delete()
-    else:
-        db.delete(db_expense)
+def delete_expense(db: Session, db_expense: Expense) -> bool:
+    db.delete(db_expense)
     db.commit()
     return True
