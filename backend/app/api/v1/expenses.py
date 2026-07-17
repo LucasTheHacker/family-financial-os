@@ -72,12 +72,12 @@ def update_expense(expense_id: UUID, expense_in: ExpenseUpdate, db: Session = De
         )
 
 @router.delete("/{expense_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_expense(expense_id: UUID, delete_group: bool = False, db: Session = Depends(get_db)):
+def delete_expense(expense_id: UUID, db: Session = Depends(get_db)):
     db_expense = crud_expense.get_expense(db, expense_id=expense_id)
     if not db_expense:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Expense not found"
         )
-    crud_expense.delete_expense(db=db, db_expense=db_expense, delete_group=delete_group)
+    crud_expense.delete_expense(db=db, db_expense=db_expense)
     return None

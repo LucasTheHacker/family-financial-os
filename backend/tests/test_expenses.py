@@ -79,7 +79,7 @@ def test_create_expense_with_fixed_values(client: TestClient, create_test_users)
         "title": "Utilities",
         "total_amount": 150.00,
         "payer_id": u1["id"],
-        "expense_type": "Fixed",
+        "expense_type": "Single",
         "billing_cycle": "2026-05",
         "participations": [
             {"user_id": u1["id"], "value": 50.00},
@@ -105,7 +105,7 @@ def test_get_expense_eager_loading(client: TestClient, create_test_users):
         "title": "Internet",
         "total_amount": 60.00,
         "payer_id": u1["id"],
-        "expense_type": "Fixed",
+        "expense_type": "Single",
         "billing_cycle": "2026-05",
         "participations": [
             {"user_id": u1["id"], "weight": 1.0},
@@ -138,7 +138,7 @@ def test_update_expense(client: TestClient, create_test_users):
         "title": "Stream services",
         "total_amount": 30.00,
         "payer_id": u1["id"],
-        "expense_type": "Fixed",
+        "expense_type": "Single",
         "billing_cycle": "2026-05",
         "participations": [
             {"user_id": u1["id"], "weight": 1.0},

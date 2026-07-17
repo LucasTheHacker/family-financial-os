@@ -18,5 +18,4 @@ class User(Base):
     expenses = relationship("Expense", back_populates="payer", cascade="all, delete-orphan")
     participations = relationship("Participation", back_populates="user", cascade="all, delete-orphan")
     
-    recurring_expenses = relationship("RecurringExpense", back_populates="payer", cascade="all, delete-orphan")
-    recurring_participations = relationship("RecurringParticipation", back_populates="user", cascade="all, delete-orphan")
+

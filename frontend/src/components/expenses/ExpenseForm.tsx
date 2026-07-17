@@ -28,8 +28,6 @@ export default function ExpenseForm() {
   const [date, setDate] = useState("");
   const [dateDisplay, setDateDisplay] = useState("");
   const [payerId, setPayerId] = useState("");
-  const [expenseType, setExpenseType] = useState<"Single" | "Fixed" | "Installment">("Single");
-  const [totalInstallments, setTotalInstallments] = useState(3);
   
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleanValue = e.target.value.replace(/\D/g, "");
@@ -240,9 +238,8 @@ export default function ExpenseForm() {
         total_amount: parsedAmount,
         date: date ? new Date(date).toISOString() : undefined,
         payer_id: payerId,
-        expense_type: expenseType,
+        expense_type: "Single",
         billing_cycle: billingCycle,
-        total_installments: expenseType === "Installment" ? totalInstallments : undefined,
         participations,
       });
 
@@ -280,7 +277,7 @@ export default function ExpenseForm() {
   return (
     <div className="rounded-2xl border border-zinc-200/50 bg-white/50 p-6 dark:border-zinc-800/50 dark:bg-zinc-900/50 backdrop-blur-md shadow-sm">
       <h3 className="text-base font-semibold leading-6 text-zinc-900 dark:text-white">Novo rateio</h3>
-      <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Registre um novo rateio: simples, fixo ou parcelado</p>
+      <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Registre um novo rateio simples</p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         {formError && (
@@ -351,44 +348,6 @@ export default function ExpenseForm() {
           </div>
         </div>
 
-        {/* Expense Type Options */}
-        <div className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-3">Tipo de Despesa</label>
-          <div className="flex gap-4 flex-wrap">
-            {[
-              { type: "Single", label: "Despesa Única" },
-              { type: "Fixed", label: "Custo Mensal Fixo" },
-              { type: "Installment", label: "Compra Parcelada" }
-            ].map((opt) => (
-              <label key={opt.type} className="inline-flex items-center gap-2 cursor-pointer text-sm">
-                <input
-                  type="radio"
-                  name="expenseType"
-                  checked={expenseType === opt.type}
-                  onChange={() => setExpenseType(opt.type as any)}
-                  className="accent-indigo-600"
-                />
-                <span className="text-zinc-700 dark:text-zinc-300">
-                  {opt.label}
-                </span>
-              </label>
-            ))}
-          </div>
-
-          {expenseType === "Installment" && (
-            <div className="mt-4 max-w-xs">
-              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2">Número de Parcelas (Meses)</label>
-              <input
-                type="number"
-                min="1"
-                max="120"
-                value={totalInstallments}
-                onChange={(e) => setTotalInstallments(parseInt(e.target.value) || 1)}
-                className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
-              />
-            </div>
-          )}
-        </div>
 
         {/* Split Participants & Selector Shortcuts */}
         <div className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-4 dark:border-zinc-800 dark:bg-zinc-900/30 space-y-4">
