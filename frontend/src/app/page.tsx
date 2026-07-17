@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import SettlementBoard from "@/components/dashboard/SettlementBoard";
 import ExpenseForm from "@/components/expenses/ExpenseForm";
 import ExpenseLedger from "@/components/expenses/ExpenseLedger";
-import RecurringTemplates from "@/components/recurring/RecurringTemplates";
 import MemberManager from "@/components/members/MemberManager";
 import { useApp } from "@/context/AppContext";
 
@@ -19,22 +18,46 @@ function HomeContent() {
     switch (activeTab) {
       case "dashboard":
         return (
-          <div className="space-y-6">
-            <SettlementBoard />
-            <ExpenseForm />
+          <div className="space-y-10">
+            {/* Seção Superior: Cadastro */}
+            <section className="space-y-3">
+              <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white sm:text-xl">
+                Cadastrar um Rateio
+              </h2>
+              <ExpenseForm />
+            </section>
+            
+            {/* Seção Inferior: Resultados */}
+            <section className="space-y-3 border-t border-zinc-200/50 pt-8 dark:border-zinc-800/50">
+              <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white sm:text-xl">
+                Cruzamento de Rateios e Resultados
+              </h2>
+              <SettlementBoard />
+            </section>
           </div>
         );
       case "ledger":
         return <ExpenseLedger />;
-      case "recurring":
-        return <RecurringTemplates />;
       case "members":
         return <MemberManager />;
       default:
         return (
-          <div className="space-y-6">
-            <SettlementBoard />
-            <ExpenseForm />
+          <div className="space-y-10">
+            {/* Seção Superior: Cadastro */}
+            <section className="space-y-3">
+              <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white sm:text-xl">
+                Cadastrar um Rateio
+              </h2>
+              <ExpenseForm />
+            </section>
+            
+            {/* Seção Inferior: Resultados */}
+            <section className="space-y-3 border-t border-zinc-200/50 pt-8 dark:border-zinc-800/50">
+              <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white sm:text-xl">
+                Cruzamento de Rateios e Resultados
+              </h2>
+              <SettlementBoard />
+            </section>
           </div>
         );
     }

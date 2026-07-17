@@ -75,7 +75,7 @@ def test_api_calculate_settlements(client: TestClient):
         "title": "Rent",
         "total_amount": 120.00,
         "payer_id": u1["id"],
-        "expense_type": "Fixed",
+        "expense_type": "Single",
         "billing_cycle": "2026-05",
         "participations": [
             {"user_id": u1["id"], "weight": 1.0},
