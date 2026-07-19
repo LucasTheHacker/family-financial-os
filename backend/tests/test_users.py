@@ -4,13 +4,14 @@ from fastapi.testclient import TestClient
 def test_create_user(client: TestClient):
     response = client.post(
         "/api/v1/users/",
-        json={"name": "Alice Smith", "email": "alice@example.com", "pix_key": "alice-pix"}
+        json={"name": "Alice Smith", "email": "alice@example.com", "pix_key": "alice-pix", "avatar_url": "https://alice.com/avatar.png"}
     )
     assert response.status_code == 201
     data = response.json()
     assert data["name"] == "Alice Smith"
     assert data["email"] == "alice@example.com"
     assert data["pix_key"] == "alice-pix"
+    assert data["avatar_url"] == "https://alice.com/avatar.png"
     assert "id" in data
     assert "created_at" in data
 
@@ -53,15 +54,16 @@ def test_update_user(client: TestClient):
     )
     user_id = create_resp.json()["id"]
 
-    # Update name and PIX key
+    # Update name, PIX key and avatar_url
     response = client.put(
         f"/api/v1/users/{user_id}",
-        json={"name": "Diana Prince", "pix_key": "diana-pix"}
+        json={"name": "Diana Prince", "pix_key": "diana-pix", "avatar_url": "https://diana.com/avatar.png"}
     )
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "Diana Prince"
     assert data["pix_key"] == "diana-pix"
+    assert data["avatar_url"] == "https://diana.com/avatar.png"
     assert data["email"] == "diana@example.com" # unchanged
 
 def test_delete_user(client: TestClient):

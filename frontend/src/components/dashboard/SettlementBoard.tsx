@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useApp } from "@/context/AppContext";
+import { UserAvatar } from "../expenses/ExpenseForm";
 
 const formatBRL = (val: number) => {
   return val.toLocaleString("pt-BR", {
@@ -42,7 +43,7 @@ export default function SettlementBoard() {
     <div className="space-y-6">
       <div className="flex flex-col gap-6">
         {/* Real-time Debt Simplification (Transactions) */}
-        <div className="rounded-2xl border border-zinc-200/50 bg-white/50 p-6 dark:border-zinc-800/50 dark:bg-zinc-900/50 backdrop-blur-md shadow-sm flex flex-col justify-between">
+        <div className="rounded-2xl glass-panel p-6 shadow-sm flex flex-col justify-between">
           <div>
             <h3 className="text-base font-semibold leading-6 text-zinc-900 dark:text-white">Valor dos acertos em tempo real</h3>
             <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
@@ -57,7 +58,7 @@ export default function SettlementBoard() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z" />
                     </svg>
                   </div>
-                  <h4 className="text-sm font-semibold text-zinc-855 dark:text-zinc-250">Nenhuma despesa registrada</h4>
+                  <h4 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Nenhuma despesa registrada</h4>
                   <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500 max-w-xs font-medium">
                     Não há despesas cadastradas neste mês. Registre uma nova despesa no formulário lateral.
                   </p>
@@ -78,21 +79,33 @@ export default function SettlementBoard() {
                 settlements.transactions.map((tx, idx) => {
                   const toPixKey = getPixKeyForUser(tx.to_user_id);
                   const isCopied = copiedId === tx.to_user_id;
+                  const fromUser = users.find((u) => u.id === tx.from_user_id);
+                  const toUser = users.find((u) => u.id === tx.to_user_id);
 
                   return (
-                    <div key={idx} className="flex flex-col rounded-xl bg-zinc-50/50 p-4 dark:bg-zinc-900/30 border border-zinc-100/50 dark:border-zinc-800/30 gap-3">
+                    <div key={idx} className="flex flex-col rounded-xl bg-zinc-50/50 p-4 dark:bg-zinc-900/30 border border-zinc-200/40 dark:border-zinc-800/40 gap-3">
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-semibold text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
-                            {tx.from_user_name.slice(0, 2).toUpperCase()}
+                          <div className="flex items-center gap-1.5">
+                            <UserAvatar name={tx.from_user_name} avatarUrl={fromUser?.avatar_url} size="w-7 h-7" />
+                            <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-xs sm:text-sm">{tx.from_user_name}</span>
                           </div>
-                          <div className="text-xs sm:text-sm">
-                            <span className="font-semibold text-zinc-855 dark:text-zinc-200">{tx.from_user_name}</span>
-                            <span className="mx-1.5 text-zinc-450 dark:text-zinc-500">envia</span>
-                            <span className="font-bold text-zinc-950 dark:text-white">R$ {formatBRL(Number(tx.amount))}</span>
-                            <span className="mx-1.5 text-zinc-450 dark:text-zinc-500">para</span>
-                            <span className="font-semibold text-zinc-855 dark:text-zinc-200">{tx.to_user_name}</span>
+                          
+                          <div className="flex flex-col items-center gap-0.5 text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider px-1">
+                            <span>envia</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3 text-indigo-500 dark:text-violet-400">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                            </svg>
                           </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <UserAvatar name={tx.to_user_name} avatarUrl={toUser?.avatar_url} size="w-7 h-7" />
+                            <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-xs sm:text-sm">{tx.to_user_name}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-sm font-bold text-zinc-900 dark:text-white">R$ {formatBRL(Number(tx.amount))}</span>
                         </div>
                       </div>
 
@@ -144,10 +157,8 @@ export default function SettlementBoard() {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Ledger Balance Sheet */}
-        <div className="rounded-2xl border border-zinc-200/50 bg-white/50 p-6 dark:border-zinc-800/50 dark:bg-zinc-900/50 backdrop-blur-md shadow-sm">
+              {/* Ledger Balance Sheet */}
+        <div className="rounded-2xl glass-panel p-6 shadow-sm">
           <h3 className="text-base font-semibold leading-6 text-zinc-900 dark:text-white">Resumo por pessoa</h3>
           <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Compare o valor pago individualmente com a sua participação em rateios.</p>
 
@@ -159,16 +170,20 @@ export default function SettlementBoard() {
                 const netBalance = Number(balance.net_balance);
                 const isOwed = netBalance > 0;
                 const isEven = netBalance === 0;
+                const user = users.find((u) => u.id === balance.user_id);
 
                 return (
                   <div key={balance.user_id} className="group relative rounded-xl bg-zinc-50/50 p-4 hover:bg-zinc-50 dark:bg-zinc-900/30 dark:hover:bg-zinc-900/50 transition-all border border-zinc-100/50 dark:border-zinc-800/30">
-                     <div className="flex items-center justify-between">
-                       <div>
-                         <h4 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{balance.user_name}</h4>
-                         <div className="mt-1 flex items-center gap-3 text-xs text-zinc-400 dark:text-zinc-500">
-                           <span>Pagou: <strong className="text-zinc-600 dark:text-zinc-300">R$ {formatBRL(Number(balance.total_paid))}</strong></span>
-                           <span className="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
-                           <span>Consumiu: <strong className="text-zinc-600 dark:text-zinc-300">R$ {formatBRL(Number(balance.total_consumed))}</strong></span>
+                     <div className="flex items-center justify-between gap-4">
+                       <div className="flex items-center gap-3">
+                         <UserAvatar name={balance.user_name} avatarUrl={user?.avatar_url} size="w-9 h-9" />
+                         <div>
+                           <h4 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{balance.user_name}</h4>
+                           <div className="mt-1 flex items-center gap-3 text-xs text-zinc-400 dark:text-zinc-500">
+                             <span>Pagou: <strong className="text-zinc-650 dark:text-zinc-300">R$ {formatBRL(Number(balance.total_paid))}</strong></span>
+                             <span className="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
+                             <span>Consumiu: <strong className="text-zinc-655 dark:text-zinc-300">R$ {formatBRL(Number(balance.total_consumed))}</strong></span>
+                           </div>
                          </div>
                        </div>
 
@@ -191,7 +206,7 @@ export default function SettlementBoard() {
               })
             )}
           </div>
-        </div>
+        </div>      </div>
       </div>
     </div>
   );

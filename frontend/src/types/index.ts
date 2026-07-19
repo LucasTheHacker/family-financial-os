@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   pix_key?: string;
+  avatar_url?: string;
   created_at: string;
 }
 
@@ -10,6 +11,7 @@ export interface UserCreate {
   name: string;
   email: string;
   pix_key?: string;
+  avatar_url?: string;
 }
 
 export interface Participation {
