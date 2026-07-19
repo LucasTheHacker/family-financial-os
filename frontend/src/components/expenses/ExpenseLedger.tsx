@@ -299,20 +299,15 @@ export default function ExpenseLedger() {
   };
 
   const handleOpenDelete = (expense: Expense) => {
-    if (expense.expense_type === "Installment" && expense.total_installments && expense.total_installments > 1) {
-      setDeleteConfirmExpense(expense);
-    } else {
-      // Normal single or fixed expense deletion
-      if (confirm(`Tem certeza de que deseja excluir a despesa "${expense.title}"?`)) {
-        performDelete(expense.id, false);
-      }
+    if (confirm(`Tem certeza de que deseja excluir a despesa "${expense.title}"?`)) {
+      performDelete(expense.id);
     }
   };
 
-  const performDelete = async (id: string, deleteGroup: boolean) => {
+  const performDelete = async (id: string) => {
     setDeletingProgress(true);
     try {
-      await deleteExpense(id, deleteGroup);
+      await deleteExpense(id);
       setDeleteConfirmExpense(null);
     } catch (err: any) {
       alert(err.message || "Falha ao excluir despesa");
@@ -617,53 +612,6 @@ export default function ExpenseLedger() {
         )}
       </div>
 
-      {/* Custom Modal for deleting installments */}
-      {deleteConfirmExpense && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800">
-            <div className="flex items-center gap-3 text-amber-600 dark:text-amber-500">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-              </svg>
-              <h3 className="text-lg font-semibold">Excluir Série de Parcelas</h3>
-            </div>
-            
-            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-              A despesa <strong className="text-zinc-800 dark:text-zinc-200">"{deleteConfirmExpense.title}"</strong> faz parte de um parcelamento. Como deseja excluí-la?
-            </p>
-            
-            <div className="mt-6 flex flex-col gap-2">
-              <button
-                disabled={deletingProgress}
-                onClick={() => performDelete(deleteConfirmExpense.id, false)}
-                className="w-full rounded-xl bg-zinc-100 px-4 py-3 text-left text-sm font-semibold text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center justify-between"
-              >
-                <span>Excluir APENAS esta parcela</span>
-                <span className="text-xs text-zinc-400">Mês: {deleteConfirmExpense.billing_cycle}</span>
-              </button>
-              
-              <button
-                disabled={deletingProgress}
-                onClick={() => performDelete(deleteConfirmExpense.id, true)}
-                className="w-full rounded-xl bg-rose-50 px-4 py-3 text-left text-sm font-semibold text-rose-700 hover:bg-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:hover:bg-rose-950/40 transition-colors flex items-center justify-between"
-              >
-                <span>Excluir ESTA e TODAS as futuras parcelas</span>
-                <span className="text-xs text-rose-500/70">Exclusão em cascata</span>
-              </button>
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <button
-                disabled={deletingProgress}
-                onClick={() => setDeleteConfirmExpense(null)}
-                className="rounded-lg border border-zinc-200 px-4 py-2 text-xs font-semibold text-zinc-650 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 transition-all"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Custom Modal for editing expense */}
       {editingExpense && (
