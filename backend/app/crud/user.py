@@ -17,7 +17,8 @@ def create_user(db: Session, user_in: UserCreate) -> User:
     db_user = User(
         name=user_in.name,
         email=user_in.email,
-        pix_key=user_in.pix_key
+        pix_key=user_in.pix_key,
+        avatar_url=user_in.avatar_url
     )
     db.add(db_user)
     db.commit()

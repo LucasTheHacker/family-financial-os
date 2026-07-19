@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useApp } from "@/context/AppContext";
+import { UserAvatar } from "../expenses/ExpenseForm";
 
 const formatBRL = (val: number) => {
   return val.toLocaleString("pt-BR", {
@@ -71,7 +72,7 @@ export default function ProfileView({ userId, onBack }: ProfileViewProps) {
   return (
     <div className="space-y-6">
       {/* Profile Header */}
-      <div className="relative overflow-hidden rounded-2xl border border-zinc-200/50 bg-white/50 p-6 dark:border-zinc-800/50 dark:bg-zinc-900/50 backdrop-blur-md shadow-sm">
+      <div className="relative overflow-hidden rounded-2xl glass-panel p-6 shadow-sm">
         <div className="absolute top-0 right-0 h-32 w-32 translate-x-6 -translate-y-6 rounded-full bg-indigo-500/10 blur-2xl"></div>
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -88,9 +89,7 @@ export default function ProfileView({ userId, onBack }: ProfileViewProps) {
               </button>
             )}
             
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-500 text-xl font-bold text-white shadow-lg shadow-indigo-500/15">
-              {member.name.slice(0, 2).toUpperCase()}
-            </div>
+            <UserAvatar name={member.name} avatarUrl={member.avatar_url} size="w-16 h-16" />
 
             <div>
               <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{member.name}</h2>
@@ -128,7 +127,7 @@ export default function ProfileView({ userId, onBack }: ProfileViewProps) {
       </div>
 
       {/* Profile Lists Grid / Tabs */}
-      <div className="rounded-2xl border border-zinc-200/50 bg-white/50 overflow-hidden dark:border-zinc-800/50 dark:bg-zinc-900/50 backdrop-blur-md shadow-sm">
+      <div className="rounded-2xl glass-panel overflow-hidden shadow-sm">
         {/* Navigation Selector */}
         <div className="border-b border-zinc-150 dark:border-zinc-800">
           <nav className="flex px-4" aria-label="Tabs">
