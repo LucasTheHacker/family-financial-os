@@ -53,10 +53,6 @@ class ExpenseResponse(ExpenseBase):
     created_at: datetime
     payer: UserResponse
     participations: List[ParticipationResponse]
-    installment_number: Optional[int] = None
-    total_installments: Optional[int] = None
-    parent_installment_id: Optional[UUID] = None
-    recurring_expense_id: Optional[UUID] = None
 
     model_config = ConfigDict(
         from_attributes=True,

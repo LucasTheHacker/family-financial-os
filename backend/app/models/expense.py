@@ -15,12 +15,6 @@ class Expense(Base):
     billing_cycle = Column(String(7), nullable=False) # 'YYYY-MM'
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     
-    # Module 3 columns
-    recurring_expense_id = Column(UUID(as_uuid=True), nullable=True)
-    installment_number = Column(Integer, nullable=True)
-    total_installments = Column(Integer, nullable=True)
-    parent_installment_id = Column(UUID(as_uuid=True), nullable=True)
-    
     # Relationships
     # Setting lazy="joined" automatically loads the payer during query
     payer = relationship("User", back_populates="expenses", lazy="joined")
