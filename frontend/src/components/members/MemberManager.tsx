@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useApp } from "@/context/AppContext";
 import ProfileView from "./ProfileView";
 import { useRouter } from "next/navigation";
+import { UserAvatar } from "../expenses/ExpenseForm";
 
 export default function MemberManager() {
   const { users, createUser, loading } = useApp();
@@ -14,6 +15,7 @@ export default function MemberManager() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pixKey, setPixKey] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -38,12 +40,14 @@ export default function MemberManager() {
         name: name.trim(),
         email: email.trim(),
         pix_key: pixKey.trim() || undefined,
+        avatar_url: avatarUrl.trim() || undefined,
       });
 
       setSuccess(`Membro da família "${name}" cadastrado com sucesso!`);
       setName("");
       setEmail("");
       setPixKey("");
+      setAvatarUrl("");
     } catch (err: any) {
       setError(err.message || "Falha ao cadastrar membro da família");
     }
@@ -61,7 +65,7 @@ export default function MemberManager() {
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       {/* Members List */}
-      <div className="lg:col-span-2 rounded-2xl border border-zinc-200/50 bg-white/50 p-6 dark:border-zinc-800/50 dark:bg-zinc-900/50 backdrop-blur-md shadow-sm space-y-6">
+      <div className="lg:col-span-2 glass-panel p-6 shadow-sm space-y-6">
         <div>
           <h3 className="text-base font-semibold leading-6 text-zinc-900 dark:text-white">Participantes</h3>
           <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Clique em qualquer membro para inspecionar seus gastos e consumos.</p>
@@ -85,14 +89,12 @@ export default function MemberManager() {
               <button
                 key={user.id}
                 onClick={() => router.push(`/profile/${user.id}`)}
-                className="flex items-center gap-4 rounded-xl bg-zinc-50/50 p-4 border border-zinc-100/50 hover:bg-zinc-100/50 dark:bg-zinc-900/30 dark:border-zinc-800/30 dark:hover:bg-zinc-900/70 transition-all text-left w-full group"
+                className="flex items-center gap-4 rounded-xl bg-zinc-50/50 p-4 border border-zinc-100/50 hover:bg-zinc-100/50 dark:bg-zinc-900/30 dark:border-zinc-800/30 dark:hover:bg-zinc-900/70 transition-all text-left w-full group cursor-pointer"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 text-sm font-bold text-white shadow-md shadow-indigo-500/10">
-                  {user.name.slice(0, 2).toUpperCase()}
-                </div>
+                <UserAvatar name={user.name} avatarUrl={user.avatar_url} size="w-12 h-12" />
                 
                 <div className="truncate flex-1">
-                  <h4 className="text-sm font-semibold text-zinc-850 dark:text-zinc-250 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  <h4 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                     {user.name}
                   </h4>
                   <p className="text-xs text-zinc-400 dark:text-zinc-500 truncate">{user.email}</p>
@@ -121,7 +123,8 @@ export default function MemberManager() {
       </div>
 
       {/* Creation form */}
-      <div className="rounded-2xl border border-zinc-200/50 bg-white/50 p-6 dark:border-zinc-800/50 dark:bg-zinc-900/50 backdrop-blur-md shadow-sm">
+      <div className="glass-panel p-6 shadow-sm">
+
         <h3 className="text-base font-semibold leading-6 text-zinc-900 dark:text-white">Cadastrar Membro da Família</h3>
         <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Adicione um novo participante para acompanhar e dividir despesas.</p>
 
@@ -172,6 +175,19 @@ export default function MemberManager() {
             />
             <p className="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">Usada para facilitar reembolsos no painel de acerto de contas.</p>
           </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">URL da Foto de Perfil (Opcional)</label>
+            <input
+              type="url"
+              placeholder="Ex: https://link.com/imagem.png"
+              value={avatarUrl}
+              onChange={(e) => setAvatarUrl(e.target.value)}
+              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+            />
+            <p className="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">Deixe em branco para usar um avatar automático baseado no nome.</p>
+          </div>
+
 
           <button
             type="submit"

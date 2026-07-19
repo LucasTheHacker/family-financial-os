@@ -20,6 +20,32 @@ const formatBRL = (val: number) => {
   });
 };
 
+export const UserAvatar = ({ name, avatarUrl, size = "w-6 h-6" }: { name: string; avatarUrl?: string; size?: string }) => {
+  if (avatarUrl) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={name}
+        className={`${size} rounded-full object-cover border border-zinc-200 dark:border-zinc-800 shrink-0`}
+        onError={(e) => {
+          (e.target as HTMLElement).style.display = "none";
+        }}
+      />
+    );
+  }
+  
+  const initialsSeed = encodeURIComponent(name);
+  const initialsUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${initialsSeed}&radius=50&backgroundColor=6366f1,8b5cf6,ec4899,3b82f6`;
+  
+  return (
+    <img
+      src={initialsUrl}
+      alt={name}
+      className={`${size} rounded-full object-cover shrink-0`}
+    />
+  );
+};
+
 export default function ExpenseForm() {
   const { users, createExpense, currentCycle, loading } = useApp();
 
@@ -275,7 +301,7 @@ export default function ExpenseForm() {
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-200/50 bg-white/50 p-6 dark:border-zinc-800/50 dark:bg-zinc-900/50 backdrop-blur-md shadow-sm">
+    <div className="rounded-2xl glass-panel p-6 shadow-sm">
       <h3 className="text-base font-semibold leading-6 text-zinc-900 dark:text-white">Novo rateio</h3>
       <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Registre um novo rateio simples</p>
 
@@ -334,17 +360,26 @@ export default function ExpenseForm() {
           {/* Payer */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">Quem pagou</label>
-            <select
-              value={payerId}
-              onChange={(e) => setPayerId(e.target.value)}
-              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
-            >
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-wrap gap-2">
+              {users.map((user) => {
+                const isSelected = payerId === user.id;
+                return (
+                  <button
+                    key={user.id}
+                    type="button"
+                    onClick={() => setPayerId(user.id)}
+                    className={`flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                      isSelected
+                        ? "border-indigo-500 bg-indigo-50/50 text-indigo-700 dark:border-violet-500 dark:bg-violet-950/20 dark:text-violet-400"
+                        : "border-zinc-200 bg-white hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
+                    }`}
+                  >
+                    <UserAvatar name={user.name} avatarUrl={user.avatar_url} size="w-5 h-5" />
+                    <span>{user.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -410,6 +445,7 @@ export default function ExpenseForm() {
                       }}
                       className="accent-indigo-600 rounded"
                     />
+                    <UserAvatar name={user.name} avatarUrl={user.avatar_url} size="w-6 h-6" />
                     <span className="text-zinc-800 dark:text-zinc-200">{user.name}</span>
                   </label>
 

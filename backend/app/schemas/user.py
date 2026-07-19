@@ -7,6 +7,7 @@ class UserBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255, description="The user's display name")
     email: EmailStr = Field(..., description="The user's unique email address")
     pix_key: Optional[str] = Field(None, max_length=255, description="The user's PIX key for payments")
+    avatar_url: Optional[str] = Field(None, max_length=2048, description="URL to the user's avatar image")
 
 class UserCreate(UserBase):
     pass
@@ -15,6 +16,7 @@ class UserUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     email: Optional[EmailStr] = None
     pix_key: Optional[str] = Field(None, max_length=255)
+    avatar_url: Optional[str] = Field(None, max_length=2048)
 
 class UserResponse(UserBase):
     id: UUID
