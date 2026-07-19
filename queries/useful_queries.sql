@@ -1,6 +1,11 @@
 -- =====================================================================
--- FAMILY FINANCIAL OS - USEFUL SQL QUERIES FOR SUPABASE SQL EDITOR
+-- FAMILY FINANCIAL OS - USEFUL SQL QUERIES FOR DBEAVER / POSTGRES
 -- =====================================================================
+
+-- Dica para o DBeaver:
+-- Para executar uma consulta individual, posicione o cursor sobre ela
+-- e aperte Ctrl+Enter (ou clique no botão de executar na lateral).
+-- Queries com parâmetros (ex: :expense_id) abrirão uma janela para você digitar o valor.
 
 -- ---------------------------------------------------------------------
 -- 1. Modificações de Estrutura (Atualizações do Banco)
@@ -24,7 +29,8 @@ DROP TABLE IF EXISTS recurring_expenses;
 -- 2. Limpeza e Reset (Manutenção do Banco)
 -- ---------------------------------------------------------------------
 
--- ATENÇÃO: Roda em cascata e apaga TUDO (participações, despesas e usuários)
+-- ATENÇÃO: Remove todos os dados em cascata (despesas, participações, membros)
+-- Para rodar, remova o comentário '--' abaixo:
 -- TRUNCATE TABLE users, expenses, participations RESTART IDENTITY CASCADE;
 
 
@@ -32,7 +38,7 @@ DROP TABLE IF EXISTS recurring_expenses;
 -- 3. Consultas Básicas de Diagnóstico
 -- ---------------------------------------------------------------------
 
--- 3.1 Ver todos os membros cadastrados, ordenados por data de criação
+-- 3.1 Ver todos os membros cadastrados
 SELECT id, name, email, pix_key, avatar_url, created_at 
 FROM users 
 ORDER BY created_at DESC;
@@ -43,36 +49,39 @@ FROM expenses e
 JOIN users u ON e.payer_id = u.id
 ORDER BY e.date DESC;
 
--- 3.3 Ver os participantes de uma despesa específica (substitua o ID da despesa)
--- SELECT p.id, u.name AS participante, p.weight, p.value
--- FROM participations p
--- JOIN users u ON p.user_id = u.id
--- WHERE p.expense_id = 'COLE_O_ID_DA_DESPESA_AQUI';
+-- 3.3 Ver os participantes e rateios de uma despesa específica
+-- (DBeaver solicitará o ID da despesa como parâmetro UUID)
+SELECT p.id, u.name AS participante, p.weight, p.value
+FROM participations p
+JOIN users u ON p.user_id = u.id
+WHERE p.expense_id = :expense_id::uuid;
 
 
 -- ---------------------------------------------------------------------
 -- 4. Consultas Analíticas (Cruzamento e Auditoria)
 -- ---------------------------------------------------------------------
 
--- 4.1 Total de despesas acumuladas por mês/ciclo
+-- 4.1 Total de despesas acumuladas por mês/ciclo (YYYY-MM)
 SELECT billing_cycle, COUNT(*) AS quantidade_despesas, SUM(total_amount) AS total_gasto
 FROM expenses
 GROUP BY billing_cycle
 ORDER BY billing_cycle DESC;
 
--- 4.2 Ranking de quem mais pagou contas em um ciclo específico (ex: '2026-05')
+-- 4.2 Ranking de quem mais pagou contas em um ciclo específico
+-- (DBeaver solicitará o ciclo como parâmetro, ex: 2026-05)
 SELECT u.name AS membro, SUM(e.total_amount) AS total_pago
 FROM expenses e
 JOIN users u ON e.payer_id = u.id
-WHERE e.billing_cycle = '2026-05'
+WHERE e.billing_cycle = :billing_cycle
 GROUP BY u.name
 ORDER BY total_pago DESC;
 
--- 4.3 Quanto cada um consumiu (participação) em um ciclo específico (ex: '2026-05')
+-- 4.3 Quanto cada um consumiu (participação) em um ciclo específico
+-- (DBeaver solicitará o ciclo como parâmetro, ex: 2026-05)
 SELECT u.name AS membro, SUM(p.value) AS total_consumido
 FROM participations p
 JOIN users u ON p.user_id = u.id
 JOIN expenses e ON p.expense_id = e.id
-WHERE e.billing_cycle = '2026-05'
+WHERE e.billing_cycle = :billing_cycle
 GROUP BY u.name
 ORDER BY total_consumido DESC;
